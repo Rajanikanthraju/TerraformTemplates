@@ -1,0 +1,4 @@
+/Activity3/.terraform/
+*.hcl
+*.tfstate
+*.tfstate.backup
