@@ -23,7 +23,7 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 #Web1 subnet
-resource "aws_subnet" "web1" {
+resource "aws_subnet" "subnets" {
 vpc_id = aws_vpc.ntier_vpc.id
 count = length(var.name_tags)
 cidr_block = cidrsubnet(var.vpc_cidr_range,8,count.index)
@@ -36,33 +36,25 @@ availability_zone =format("${var.region}%s",count.index%2 == 0?"a":"b")
 }
 resource "aws_security_group" "web_sg" {
   vpc_id = aws_vpc.ntier_vpc.id
+  description   = local.default_description
   ingress {
-    description      = "allow ssh connection"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port        = local.ssh_port
+    to_port          = local.ssh_port
+    protocol         = local.tcp
+    cidr_blocks      = [local.anywhere]
       }
-      egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-}
-ingress {
-    description      = "allow http connection"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+  ingress {
+    from_port        = local.web_port
+    to_port          = local.web_port
+    protocol         = local.tcp
+    cidr_blocks      = [local.anywhere]
       }
-      egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+    egress {
+    from_port        = local.all_ports
+    to_port          = local.all_ports
+    protocol         = local.any_protocal
+    cidr_blocks      = [local.anywhere]
+    ipv6_cidr_blocks = [local.anywhere_ipv6]
 }
 tags = {
   "Name" = "websgfromtf"
@@ -70,41 +62,27 @@ tags = {
 }
 resource "aws_security_group" "app_sg" {
   vpc_id = aws_vpc.ntier_vpc.id
-  ingress {
-    description      = "allow http connection"
-    from_port        = 8080
-    to_port          = 8080
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+  description      = local.default_description
+  ingress {    
+    from_port        = local.ssh_port
+    to_port          = local.ssh_port
+    protocol         = local.tcp
+    cidr_blocks      = [local.anywhere]
       }
-      egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+  ingress {
+    from_port        = local.app_port
+    to_port          = local.app_port
+    protocol         = local.tcp
+    cidr_blocks      = [var.vpc_cidr_range]
+      }
+     egress {
+    from_port        = local.all_ports
+    to_port          = local.all_ports
+    protocol         = local.any_protocal
+    cidr_blocks      = [local.anywhere]
+    ipv6_cidr_blocks = [local.anywhere_ipv6]
 }
 tags = {
   "Name" = "appsgfromtf"
-}
-}
-resource "aws_security_group" "db_sg" {
-  vpc_id = aws_vpc.ntier_vpc.id
-  ingress {
-    description      = "allow database connection"
-    from_port        = 3306
-    to_port          = 3306
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-      }
-      egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-}
-tags = {
-  "Name" = "dbsgfromtf"
 }
 }
