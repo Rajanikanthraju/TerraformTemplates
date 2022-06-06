@@ -1,4 +1,5 @@
 /Activity*/.terraform/
+/*/Activity*/.terraform/
 *.hcl
 *.tfstate
 *.tfstate.backup
