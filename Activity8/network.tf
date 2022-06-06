@@ -86,3 +86,21 @@ tags = {
   "Name" = "appsgfromtf"
 }
 }
+resource "aws_route_table" "publicrt" {
+vpc_id = aws_vpc.ntier_vpc.id
+route {
+  cidr_block = local.anywhere
+  gateway_id = aws_internet_gateway.igw.id
+}
+tags = {
+  "Name" = "Public RT"
+}
+  
+}
+resource "aws_route_table" "privatert" {
+vpc_id = aws_vpc.ntier_vpc.id
+tags = {
+  "Name" = "Private RT"
+}
+  
+}
