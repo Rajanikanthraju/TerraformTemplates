@@ -20,3 +20,8 @@ variable "bucket" {
     description = "bucket name"
   
 }
+variable "public_subnets" {
+    type =list(string)
+    default=["web1-tf","web2-tf"]
+  
+}
