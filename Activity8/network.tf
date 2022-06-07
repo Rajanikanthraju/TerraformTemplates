@@ -21,6 +21,9 @@ resource "aws_internet_gateway" "igw" {
   tags = {
     Name = "tf-igw"
   }
+  depends_on = [
+  aws_vpc.ntier_vpc
+]
 }
 #Web1 subnet
 resource "aws_subnet" "subnets" {
@@ -32,7 +35,9 @@ availability_zone =format("${var.region}%s",count.index%2 == 0?"a":"b")
 
      "Name" = var.name_tags[count.index]
  } 
-  
+ depends_on = [
+  aws_vpc.ntier_vpc
+] 
 }
 resource "aws_security_group" "web_sg" {
   vpc_id = aws_vpc.ntier_vpc.id
@@ -59,6 +64,9 @@ resource "aws_security_group" "web_sg" {
 tags = {
   "Name" = "websgfromtf"
 }
+depends_on = [
+  aws_vpc.ntier_vpc
+]
 }
 resource "aws_security_group" "app_sg" {
   vpc_id = aws_vpc.ntier_vpc.id
@@ -85,6 +93,38 @@ resource "aws_security_group" "app_sg" {
 tags = {
   "Name" = "appsgfromtf"
 }
+depends_on = [
+  aws_vpc.ntier_vpc
+]
+}
+resource "aws_security_group" "db_sg" {
+  vpc_id = aws_vpc.ntier_vpc.id
+  description      = local.default_description
+  ingress {    
+    from_port        = local.ssh_port
+    to_port          = local.ssh_port
+    protocol         = local.tcp
+    cidr_blocks      = [local.anywhere]
+      }
+  ingress {
+    from_port        = local.db_port
+    to_port          = local.db_port
+    protocol         = local.tcp
+    cidr_blocks      = [var.vpc_cidr_range]
+      }
+     egress {
+    from_port        = local.all_ports
+    to_port          = local.all_ports
+    protocol         = local.any_protocal
+    cidr_blocks      = [local.anywhere]
+    ipv6_cidr_blocks = [local.anywhere_ipv6]
+}
+tags = {
+  "Name" = "dbsgfromtf"
+}
+depends_on = [
+  aws_vpc.ntier_vpc
+]
 }
 resource "aws_route_table" "publicrt" {
 vpc_id = aws_vpc.ntier_vpc.id
@@ -102,7 +142,7 @@ vpc_id = aws_vpc.ntier_vpc.id
 tags = {
   "Name" = "Private RT"
 }
-  
+ 
 }
 
 resource "aws_route_table_association" "associations" {

@@ -25,3 +25,8 @@ variable "public_subnets" {
     default=["web1-tf","web2-tf"]
   
 }
+variable "db_subnets" {
+    type =list(string)
+    default=["db1-tf","db2-tf"]
+  
+}

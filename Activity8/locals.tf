@@ -9,5 +9,6 @@ locals {
   anywhere_ipv6="::/0"
   default_description="Created for terraform"
   any_protocal="-1"
+  db_subnet_group_name="my-test-database-subnet-group"
 
 }
